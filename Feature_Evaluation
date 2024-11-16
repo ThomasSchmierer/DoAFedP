@@ -1,0 +1,147 @@
+v=1;
+oo = 30;
+file_num = []
+
+
+for j = 1:length(file_num)
+
+load(file_num(j)+ext);
+
+%Output graph for xxx2
+for i=1:oo
+x=xxx2(:,i).';
+X=[ones(size(x))' (x.^(v))'];
+[b,bint,r,rint,stats]= regress(y,X);
+R2(i)=stats(1);
+end
+
+figure(2)
+plot(R2)
+[value index]=max(R2);
+z2=xxx2(index,:);
+title(['Median based on frequency band for patient ' num2str(file_num(j)) ' Plot'])
+xlabel('FFT band') 
+ylabel('Correlation (r)') 
+
+for i=1:oo
+x=xxx3(:,i).';
+X=[ones(size(x))' (x.^(v))'];
+[b,bint,r,rint,stats]= regress(y,X);
+R3(i)=stats(1);
+end
+
+figure(3)
+plot(R3)
+[value index]=max(R3);
+z3=xxx3(index,:);
+
+title(['Sample Entropy for patient ' num2str(file_num(j)) ' Plot'])
+xlabel('FFT band') 
+ylabel('Correlation (r)') 
+
+for i=1:oo
+x=xxx4(:,i).';
+X=[ones(size(x))' (x.^(v))'];
+[b,bint,r,rint,stats]= regress(y,X);
+R4(i)=stats(1);
+end
+
+figure(4)
+plot(R4)
+[value index]=max(R4);
+z4=xxx4(index,:);
+
+title(['Median Spectral Entropy for patient ' num2str(file_num(j)) ' Plot'])
+xlabel('FFT band') 
+ylabel('Correlation (r)') 
+
+
+%Output graph for xxx5
+for i=1:oo
+x=xxx5(:,i).';
+X=[ones(size(x))' (x.^(v))'];
+[b,bint,r,rint,stats]= regress(y,X);
+R5(i)=stats(1);
+end
+
+figure(5)
+plot(R5)
+[value index]=max(R5);
+z5=xxx5(index,:);
+
+title(['Std Spectral Entropy for patient ' num2str(file_num(j)) ' Plot'])
+xlabel('FFT band') 
+ylabel('Correlation (r)') 
+
+
+%Output graph for xxx6
+for i=1:oo
+x=xxx6(:,i).';
+X=[ones(size(x))' (x.^(v))'];
+[b,bint,r,rint,stats]= regress(y,X);
+R6(i)=stats(1);
+end
+
+figure(6)
+plot(R6)
+[value index]=max(R6);
+z6=xxx6(index,:);
+
+title(['LZC for patient ' num2str(file_num(j)) ' Plot'])
+xlabel('FFT band') 
+ylabel('Correlation (r)') 
+
+
+for i=1:oo
+x=xxx7(:,i).';
+X=[ones(size(x))' (x.^(v))'];
+[b,bint,r,rint,stats]= regress(y,X);
+R7(i)=stats(1);
+end
+
+figure(7)
+plot(R7)
+[value index]=max(R7);
+z7=xxx7(index,:);
+title(['SODP for patient ' num2str(file_num(j)) ' Plot'])
+xlabel('FFT band') 
+ylabel('Correlation (r)') 
+
+j
+
+for i=1:oo
+x=xxx8(:,i).';
+X=[ones(size(x))' (x.^(v))'];
+[b,bint,r,rint,stats]= regress(y,X);
+R8(i)=stats(1);
+end
+
+figure(8)
+plot(R8)
+[value index]=max(R8);
+z8=xxx8(index,:);
+
+title(['Permutation Entropy for patient ' num2str(file_num(j)) ' Plot'])
+xlabel('FFT band') 
+ylabel('Correlation (r)') 
+j
+end
+
+
+%% Scatter Plot - for features only
+scatter = 1;
+if scatter == 1
+    X_Feature = xxx2(:,15);
+
+    fit(y,X_Feature,'poly1')
+    fitresult = fit(y, X_Feature,'poly1');
+    p11 = predint(fitresult,y,0.95,'observation','off');
+    plot(fitresult,y,X_Feature), hold on, plot(y,p11,'m--')
+    title('Spectral entropy against BIS')
+    xlabel('BIS Value') 
+    ylabel('Spectral entropy') 
+    %xlim([0 100])
+    %ylim([0 150])
+end
+%%
+T = table(R2', R3', R4', R5', R6', R7', R8', 'VariableNames', {'Median based on frequency band', 'Sample Entropy', 'Median Spectral Entropy', 'Std Spectral Entropy', 'LZC', 'SODP', 'Permutation Entropy'});
