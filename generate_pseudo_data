@@ -3,7 +3,7 @@ function [X_pseudo, y_pseudo] = generate_pseudo_data(net, features, mean_vector,
     num_samples = 2000;
     features = X_original(2:end, :)'; 
       
-    % Generate synthetic data from multivariate normal distribution
+    % Generate pseudo data from multivariate normal distribution
     X_new = mvnrnd(mean_vector, cov_matrix, num_samples);  
     
     % Generate pseudo labels using the local model
