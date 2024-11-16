@@ -1,0 +1,110 @@
+ext = ".mat";
+
+test_file = []
+Start_list = []
+End_list = []
+
+for file_num = 1:length(test_file)
+%file_num = 7 
+    clear EEG BIS y xxx2 xxx3 xxx4 xxx5 xxx6 xxx7 xxx8 z zzz bis
+    
+    %Cycle through the list of test files and extracts each automatically
+    %load_file = "case" + test_file(file_num) + ext;
+    load_file = test_file(file_num) + ext;
+    
+    %Variable created for the load file
+    load(load_file)
+
+    Start = Start_list(file_num);
+    End = End_list(file_num);
+    
+    Non_Denoised_x_total=CH2((Start-1)*128+1:End*128);
+    
+    Non_Denoised_x_total=New_bandfilter_TLS(Non_Denoised_x_total);
+    BIS = BIS(Start:End); 
+    SQI = SQI(Start:End);
+    %creating the windows of EEG signal
+    z=Non_Denoised_x_total;
+    
+    sample_rate=128;
+
+    if length(BIS)*sample_rate<=length(z)
+        BIS=BIS(1:length(BIS));
+        z=z(1:sample_rate*length(BIS));
+    else
+        BIS=BIS(1:floor(length(z)/sample_rate));
+        %Floor roounds to nearest integer
+        z=z(1:sample_rate*floor(length(z)/sample_rate));
+    end
+    unit_size = 56
+    number_period=floor(length(BIS)/unit_size); 
+    value_length=unit_size*number_period;
+    BIS=BIS(1:value_length);
+    %BIS vector set up
+    z=z(1:value_length*sample_rate);
+    %x is BIS x sample rate as 128 EEG observations per second
+    % Building matrix for the window size - for not denoised
+    zzz=[];
+    %empty vector
+    
+%Denoising methods    
+%'rigrsure'
+%'sqtwolog'
+%'heursure'
+%'minimaxi'
+
+    
+   %Realocate signal into wave packets
+    for i=1:length(BIS)-unit_size+1
+        zzz(i,:)=z((i-1)*sample_rate+1:(i-1)*sample_rate+unit_size*sample_rate);
+        zzz(i,:)= thselect(zzz(i,:),'rigrsure');
+        %Attempt denoising of each packet in isolation
+    end 
+
+    % Building the BIS matrix - Removes invalid BIS output
+    y=BIS(unit_size:length(BIS));
+    
+    for i=1:length(y)
+        if y(i)<0
+            for m=1:length(y)-i
+                if y(i+m)>0
+                    y(i)=y(i+m);
+                    break
+                end
+            end
+        end
+    end
+    
+    %implementing EWT to extract features from xxx
+    %Parameters for Permutation Entropy
+    ord=3;
+    t=768;
+    %For use with one feature only - CH2
+    
+    %This version extracts only the relevant features for a limited group
+    %of FFT functions. These are selected based on the VitalDB and
+    %Toowoomba FL model effectiveness.
+    
+    for i=1:length(y)
+        Test=FFT_TLS(zzz(i,:).');
+       for j=1:30
+            xxx2(i,j) = median(Test(j,:).');
+            xxx3(i,j) = sampen(Test(j,:).',1, 0.2, 'chebychev');
+            xxx4(i,j) = median(pentropy(Test(j,:).',128));
+            xxx5(i,j) = std(pentropy(Test(j,:).',128));
+            xxx6(i,j) = LZC(Test(j,:).');
+            xxx7(i,j) = SODP(Test(j,:).');
+            xxx8(i,j) = perm(Test(j,:),ord,t);
+        end
+        
+        if rem(i,100) == 0;
+            disp(i);
+        end
+    end
+  
+    %Save the extracted features
+    save_file = test_file(file_num) + ext
+    vars = {'y','xxx2','xxx3', 'xxx4', 'xxx5', 'xxx6', 'xxx7', 'xxx8'};
+    save(save_file, vars{:})
+
+end
