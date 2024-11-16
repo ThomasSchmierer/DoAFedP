@@ -1,0 +1,12 @@
+function [net, tr, num_params] = train_local_model(X_train, y_train)
+    % Configure and train the local feedforward neural network models
+    net = fitnet([10, 10, 10], 'trainscg');  % Three hidden layers with 10 neurons each
+    net = configure(net, X_train, y_train);
+    [net, tr] = train(net, X_train, y_train);
+
+    % Calculate the total number of parameters (weights + biases)
+    num_params = sum(cellfun(@numel, net.IW)) + sum(cellfun(@numel, net.LW)) + sum(cellfun(@numel, net.b));
+
+    % Display the total number of parameters
+    fprintf('Total number of parameters in the neural network: %d\n', num_params);
+end
